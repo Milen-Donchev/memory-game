@@ -6,24 +6,32 @@ import _ from "lodash";
 
 import * as GameActions from "../store/game/game";
 
+import cardBack from "../resources/card-back.svg";
+
 let flipTimeout;
 
 const Card = (props) => {
-  const { cardId, image, key } = props;
+  const { cardId, image, _key } = props;
 
   const dispatch = useDispatch();
 
+  const selectedCard = useSelector((state) => state.game.selectedCard);
+  const grid = useSelector((state) => state.game.grid);
   const correctPicks = useSelector((state) => state.game.correctPicks);
   const shouldCloseAllCards = useSelector(
     (state) => state.game.shouldCloseAllCards
   );
-  const selectedCard = useSelector((state) => state.game.selectedCard);
 
   const [isFlipped, setIsFlipped] = useState(false);
   const [disableCard, setDisableCard] = useState(false);
   const [flipBackOngoing, setFlipBackOngoing] = useState(false);
 
+  const cardAlreadyPaired = _.includes(correctPicks, cardId);
+  const cardWidth = `calc((50vw - (${grid.cols - 1}*0.3rem))/${grid.cols})`;
+  const cardHeight = `calc((80vh - (${grid.rows - 1}*0.3rem) )/ ${grid.rows})`;
+
   const flipCard = () => {
+    dispatch(GameActions.START_GAME());
     if (_.includes(correctPicks, cardId) || isFlipped || flipBackOngoing)
       return;
     if (!isFlipped && !selectedCard) {
@@ -53,7 +61,7 @@ const Card = (props) => {
         dispatch(GameActions.SET_SELECTED_CARD(null));
         dispatch(GameActions.SET_SHOULD_CLOSE_ALL_CARDS(false));
         setFlipBackOngoing(false);
-      }, 400);
+      }, 300);
     }
   }, [shouldCloseAllCards]); // eslint-disable-line
 
@@ -64,36 +72,48 @@ const Card = (props) => {
     return () => clearTimeout(flipTimeout);
   }, [correctPicks, cardId]);
 
+
   return (
     <Flex
-      m="0.2rem"
-      h="5rem"
-      key={key}
+      boxShadow={cardAlreadyPaired && "0px 0px 5px lime"}
+      cursor={flipBackOngoing || cardAlreadyPaired ? "no-drop" : "pointer"}
+      onClick={flipCard}
+      w={cardWidth}
+      h={cardHeight}
+      key={_key}
       borderRadius="10px"
-      overflow="hidden"
-      boxShadow={disableCard && `0px 3px 3px lime`}
     >
-      <ReactCardFlip isFlipped={disableCard ? true : isFlipped} infinite>
+      <ReactCardFlip
+        containerStyle={cardStyles}
+        isFlipped={disableCard ? true : isFlipped}
+        infinite
+      >
         <Image
-          boxShadow="0px 2px 3px rgba(0, 0, 0, 0.75)"
-          onClick={flipCard}
-          src="https://picsum.photos/200"
-          w="100%"
+          src={cardBack}
           userSelect="none"
-          draggable="false"
+          h={cardHeight}
+          objectFit="fill"
+          w={cardWidth}
         />
-        <Flex
-          onClick={flipCard}
-          bg="rgba(0,0,0,0.2)"
-          w="100%"
-          justify="center"
-          align="center"
-        >
-          <Image w="100%" draggable="false" userSelect="none" src={image} />
+        <Flex justify="center" align="center" w={cardWidth} h={cardHeight}>
+          <Image
+            w="90%"
+            h="90%"
+            objectFit="fill"
+            borderRadius="10px"
+            draggable="false"
+            userSelect="none"
+            src={image}
+          />
         </Flex>
       </ReactCardFlip>
     </Flex>
   );
+};
+
+const cardStyles = {
+  borderRadius: "10px",
+  overflow: "hidden",
 };
 
 export default Card;
