@@ -1,12 +1,13 @@
 import { Flex, Grid, Text } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { isEmpty } from "lodash";
 
-import * as GameActions from "../store/game/game";
+import * as GameActions from "../../store/game/game";
 
 import Card from "./Card";
 
-import background from "../resources/background.jpg";
+import background from "../../resources/background.jpg";
 
 const PlayingBoard = () => {
   const dispatch = useDispatch();
@@ -16,21 +17,20 @@ const PlayingBoard = () => {
   const difficulty = useSelector((state) => state.game.difficulty);
   const gameStarted = useSelector((state) => state.game.gameStarted);
   const correctPicks = useSelector((state) => state.game.correctPicks);
-
-  const [gameWon, setGameWon] = useState(false);
+  const gameWon = useSelector((state) => state.game.gameWon);
 
   useEffect(() => {
-    if (correctPicks.length !== 0 && correctPicks.length === cards.length / 2) {
-      setGameWon(true);
+    if (!isEmpty(correctPicks) && correctPicks.length === cards.length / 2) {
+      dispatch(GameActions.SET_GAME_WON());
     }
-  }, [correctPicks]); // eslint-disable-line
+  }, [correctPicks]);
 
   useEffect(() => {
     if (!gameStarted) {
       dispatch(GameActions.SET_CARDS(difficulty));
       dispatch(GameActions.SET_GRID(difficulty));
     }
-  }, [difficulty, gameStarted]); // eslint-disable-line
+  }, [difficulty, gameStarted]);
 
   if (!cards || !grid) return null;
 

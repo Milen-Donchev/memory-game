@@ -5,13 +5,14 @@ import { fillBoardAndShuffle, mapDifficultyToGrid } from "../../utils/game";
 const gameSlice = createSlice({
   name: "game",
   initialState: {
-    difficulty: "medium",
-    grid: null,
-    selectedCard: null,
-    shouldCloseAllCards: false,
-    correctPicks: [],
-    cards: [],
-    gameStarted: false,
+    difficulty: "medium", // easy | medium | hard
+    grid: null, // {cols: number; rows: number} | null
+    selectedCard: null, // number | null;
+    shouldCloseAllCards: false, // true | false
+    correctPicks: [], // number[]
+    cards: [], // cards[]
+    gameStarted: false, // true | false
+    gameWon: false, // true | false
   },
   reducers: {
     SET_GRID(state, action) {
@@ -36,12 +37,16 @@ const gameSlice = createSlice({
       state.grid = null;
       state.selectedCard = null;
       state.gameStarted = false;
+      state.gameWon = false;
     },
     START_GAME(state) {
       state.gameStarted = true;
     },
     SET_DIFFICULTY(state, action) {
       state.difficulty = action.payload;
+    },
+    SET_GAME_WON(state) {
+      state.gameWon = true;
     },
   },
 });
@@ -55,5 +60,6 @@ export const {
   RESET_GAME,
   START_GAME,
   SET_DIFFICULTY,
+  SET_GAME_WON,
 } = gameSlice.actions;
 export default gameSlice.reducer;

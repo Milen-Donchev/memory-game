@@ -3,9 +3,14 @@ import _ from "lodash";
 import { CARDS } from "./cards";
 
 const GRID = {
-  eazy: "3x4",
+  easy: "3x4",
   medium: "4x5",
   hard: "5x6",
+};
+
+const getNumOfCards = (difficulty) => {
+  const grid = GRID[difficulty].split("x");
+  return parseInt(grid[0]) * parseInt(grid[1]);
 };
 
 export const mapDifficultyToGrid = (level) => {
@@ -16,13 +21,8 @@ export const mapDifficultyToGrid = (level) => {
   };
 };
 
-const getNumOfCards = (level) => {
-  const grid = GRID[level].split("x");
-  return parseInt(grid[0]) * parseInt(grid[1]);
-};
-
-export const fillBoardAndShuffle = (level) => {
-  const allCards = getNumOfCards(level);
+export const fillBoardAndShuffle = (difficulty) => {
+  const allCards = getNumOfCards(difficulty);
 
   const cardsArray = [];
   const shuffledAllCards = _.shuffle([...CARDS]);

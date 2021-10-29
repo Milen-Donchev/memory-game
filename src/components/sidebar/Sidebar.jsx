@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button, Flex, Select, Text } from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
 
-import * as GameActions from "../store/game/game";
+import * as GameActions from "../../store/game/game";
 
 import ConfirmResetModal from "./ConfirmResetModal";
 
@@ -22,43 +22,46 @@ const Sidebar = () => {
   const onResetModalClose = () => setIsConfirmModalOpen(false);
   const openResetModal = () => setIsConfirmModalOpen(true);
 
-  const resetGame = () => {
+  const confirmResetGame = () => {
     dispatch(GameActions.RESET_GAME());
     onResetModalClose();
   };
 
   return (
-    <Flex bg="#171717" h="100vh" w="30%" direction="column">
-      <Flex direction="column" w="100%" align="center">
-        <Text color="white">Difficulty</Text>
-        <Select
-          color="white"
-          value={difficulty}
-          onChange={handleSelect}
-          w="80%"
-          size="xs"
-        >
-          <option value="eazy">eazy</option>
-          <option value="medium">medium</option>
-          <option value="hard">hard</option>
-        </Select>
+    <>
+      <Flex bg="#171717" h="100vh" w="30%" direction="column">
+        <Flex direction="column" w="100%" align="center">
+          <Text color="white">Difficulty</Text>
+          <Select
+            color="white"
+            value={difficulty}
+            onChange={handleSelect}
+            w="80%"
+            size="xs"
+          >
+            <option value="easy">easy</option>
+            <option value="medium">medium</option>
+            <option value="hard">hard</option>
+          </Select>
+        </Flex>
+        <Flex w="100%" direction="column" m="1rem 0" align="center">
+          <Button
+            onClick={openResetModal}
+            disabled={!gameStarted}
+            w="80%"
+            size="xs"
+          >
+            Reset game
+          </Button>
+        </Flex>
       </Flex>
-      <Flex w="100%" direction="column" m="1rem 0" align="center">
-        <Button
-          onClick={openResetModal}
-          disabled={!gameStarted}
-          w="90%"
-          size="xs"
-        >
-          Reset game
-        </Button>
-      </Flex>
+
       <ConfirmResetModal
         isOpen={isConfirmModalOpen}
         onClose={onResetModalClose}
-        onConfirm={resetGame}
+        onConfirm={confirmResetGame}
       />
-    </Flex>
+    </>
   );
 };
 

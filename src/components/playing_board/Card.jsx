@@ -1,12 +1,12 @@
-import ReactCardFlip from "react-card-flip";
 import { Image, Flex } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import ReactCardFlip from "react-card-flip";
 import _ from "lodash";
 
-import * as GameActions from "../store/game/game";
+import * as GameActions from "../../store/game/game";
 
-import cardBack from "../resources/card-back.svg";
+import cardBack from "../../resources/card-back.svg";
 
 let flipTimeout;
 
@@ -21,6 +21,7 @@ const Card = (props) => {
   const shouldCloseAllCards = useSelector(
     (state) => state.game.shouldCloseAllCards
   );
+  const gameStarted = useSelector((state) => state.game.gameStarted);
 
   const [isFlipped, setIsFlipped] = useState(false);
   const [disableCard, setDisableCard] = useState(false);
@@ -31,9 +32,12 @@ const Card = (props) => {
   const cardHeight = `calc((80vh - (${grid.rows - 1}*0.3rem) )/ ${grid.rows})`;
 
   const flipCard = () => {
-    dispatch(GameActions.START_GAME());
-    if (_.includes(correctPicks, cardId) || isFlipped || flipBackOngoing)
+    if (!gameStarted) {
+      dispatch(GameActions.START_GAME());
+    }
+    if (cardAlreadyPaired || isFlipped || flipBackOngoing) {
       return;
+    }
     if (!isFlipped && !selectedCard) {
       dispatch(GameActions.SET_SELECTED_CARD(cardId));
       setIsFlipped(true);
@@ -54,7 +58,7 @@ const Card = (props) => {
   };
 
   useEffect(() => {
-    if (shouldCloseAllCards && !_.includes(correctPicks, cardId)) {
+    if (shouldCloseAllCards && !cardAlreadyPaired) {
       setFlipBackOngoing(true);
       flipTimeout = setTimeout(() => {
         setIsFlipped(false);
@@ -66,12 +70,11 @@ const Card = (props) => {
   }, [shouldCloseAllCards]); // eslint-disable-line
 
   useEffect(() => {
-    if (_.includes(correctPicks, cardId)) {
+    if (cardAlreadyPaired) {
       setDisableCard(true);
     }
     return () => clearTimeout(flipTimeout);
-  }, [correctPicks, cardId]);
-
+  }, [cardAlreadyPaired]);
 
   return (
     <Flex
@@ -83,13 +86,10 @@ const Card = (props) => {
       key={_key}
       borderRadius="10px"
     >
-      <ReactCardFlip
-        containerStyle={cardStyles}
-        isFlipped={disableCard ? true : isFlipped}
-        infinite
-      >
+      <ReactCardFlip isFlipped={disableCard ? true : isFlipped}>
         <Image
           src={cardBack}
+          draggable="false"
           userSelect="none"
           h={cardHeight}
           objectFit="fill"
@@ -109,11 +109,6 @@ const Card = (props) => {
       </ReactCardFlip>
     </Flex>
   );
-};
-
-const cardStyles = {
-  borderRadius: "10px",
-  overflow: "hidden",
 };
 
 export default Card;
