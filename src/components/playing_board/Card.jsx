@@ -1,80 +1,21 @@
-import { Image, Flex } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { Flex } from "@chakra-ui/react";
+import { useSelector } from "react-redux";
 import ReactCardFlip from "react-card-flip";
-import _ from "lodash";
 
-import * as GameActions from "../../store/game/game";
+import { useFlipCard } from "../../hooks/useFlipCard";
 
 import cardBack from "../../resources/card-back.svg";
-
-let flipTimeout;
 
 const Card = (props) => {
   const { cardId, image, _key } = props;
 
-  const dispatch = useDispatch();
+  const [isFlipped, flipBackOngoing, disableCard, cardAlreadyPaired, flipCard] =
+    useFlipCard(cardId);
 
-  const selectedCard = useSelector((state) => state.game.selectedCard);
   const grid = useSelector((state) => state.game.grid);
-  const correctPicks = useSelector((state) => state.game.correctPicks);
-  const shouldCloseAllCards = useSelector(
-    (state) => state.game.shouldCloseAllCards
-  );
-  const gameStarted = useSelector((state) => state.game.gameStarted);
 
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [disableCard, setDisableCard] = useState(false);
-  const [flipBackOngoing, setFlipBackOngoing] = useState(false);
-
-  const cardAlreadyPaired = _.includes(correctPicks, cardId);
   const cardWidth = `calc((50vw - (${grid.cols - 1}*0.3rem))/${grid.cols})`;
   const cardHeight = `calc((80vh - (${grid.rows - 1}*0.3rem) )/ ${grid.rows})`;
-
-  const flipCard = () => {
-    if (!gameStarted) {
-      dispatch(GameActions.START_GAME());
-    }
-    if (cardAlreadyPaired || isFlipped || flipBackOngoing) {
-      return;
-    }
-    if (!isFlipped && !selectedCard) {
-      dispatch(GameActions.SET_SELECTED_CARD(cardId));
-      setIsFlipped(true);
-      return;
-    }
-    if (selectedCard && selectedCard === cardId) {
-      setIsFlipped(true);
-      dispatch(GameActions.SET_CORRECT_PICKS(cardId));
-      dispatch(GameActions.SET_SELECTED_CARD(null));
-      setDisableCard(true);
-      return;
-    }
-    if (selectedCard && selectedCard !== cardId) {
-      setIsFlipped(true);
-      dispatch(GameActions.SET_SELECTED_CARD(null));
-      dispatch(GameActions.SET_SHOULD_CLOSE_ALL_CARDS(true));
-    }
-  };
-
-  useEffect(() => {
-    if (shouldCloseAllCards && !cardAlreadyPaired) {
-      setFlipBackOngoing(true);
-      flipTimeout = setTimeout(() => {
-        setIsFlipped(false);
-        dispatch(GameActions.SET_SELECTED_CARD(null));
-        dispatch(GameActions.SET_SHOULD_CLOSE_ALL_CARDS(false));
-        setFlipBackOngoing(false);
-      }, 300);
-    }
-  }, [shouldCloseAllCards]); // eslint-disable-line
-
-  useEffect(() => {
-    if (cardAlreadyPaired) {
-      setDisableCard(true);
-    }
-    return () => clearTimeout(flipTimeout);
-  }, [cardAlreadyPaired]);
 
   return (
     <Flex
@@ -86,9 +27,14 @@ const Card = (props) => {
       key={_key}
       borderRadius="10px"
     >
-      <ReactCardFlip isFlipped={disableCard ? true : isFlipped}>
-        <Image
-          src={cardBack}
+      <ReactCardFlip
+        flipSpeedFrontToBack={0.4}
+        flipSpeedBackToFront={0.4}
+        isFlipped={disableCard ? true : isFlipped}
+      >
+        <Flex
+          backgroundImage={cardBack}
+          backgroundSize="100% 100%"
           draggable="false"
           userSelect="none"
           h={cardHeight}
@@ -96,14 +42,15 @@ const Card = (props) => {
           w={cardWidth}
         />
         <Flex justify="center" align="center" w={cardWidth} h={cardHeight}>
-          <Image
+          <Flex
             w="90%"
             h="90%"
-            objectFit="fill"
+            backgroundImage={image}
+            backgroundPosition="center"
+            backgroundSize="100% 100%"
             borderRadius="10px"
             draggable="false"
             userSelect="none"
-            src={image}
           />
         </Flex>
       </ReactCardFlip>

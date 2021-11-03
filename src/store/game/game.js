@@ -13,6 +13,7 @@ const gameSlice = createSlice({
     cards: [], // cards[]
     gameStarted: false, // true | false
     gameWon: false, // true | false
+    gameOver: false, // true | false
   },
   reducers: {
     SET_GRID(state, action) {
@@ -38,6 +39,7 @@ const gameSlice = createSlice({
       state.selectedCard = null;
       state.gameStarted = false;
       state.gameWon = false;
+      state.gameOver = false;
     },
     START_GAME(state) {
       state.gameStarted = true;
@@ -47,6 +49,9 @@ const gameSlice = createSlice({
     },
     SET_GAME_WON(state) {
       state.gameWon = true;
+    },
+    SET_GAME_OVER(state) {
+      state.gameOver = true;
     },
   },
 });
@@ -61,5 +66,6 @@ export const {
   START_GAME,
   SET_DIFFICULTY,
   SET_GAME_WON,
+  SET_GAME_OVER,
 } = gameSlice.actions;
 export default gameSlice.reducer;

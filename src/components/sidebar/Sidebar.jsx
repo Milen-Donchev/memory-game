@@ -1,58 +1,33 @@
-import { useState } from "react";
-import { Button, Flex, Select, Text } from "@chakra-ui/react";
-import { useDispatch, useSelector } from "react-redux";
+import { Flex, Text } from "@chakra-ui/react";
 
-import * as GameActions from "../../store/game/game";
+import { useResetGame } from "../../hooks/useResetGame";
 
+import Timer from "./Timer";
 import ConfirmResetModal from "./ConfirmResetModal";
+import RestartGameButton from "./RestartGameButton";
+import DifficultySelector from "./DifficultySelector";
 
 const Sidebar = () => {
-  const dispatch = useDispatch();
-
-  const difficulty = useSelector((state) => state.game.difficulty);
-  const gameStarted = useSelector((state) => state.game.gameStarted);
-
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-
-  const handleSelect = (e) => {
-    dispatch(GameActions.RESET_GAME());
-    dispatch(GameActions.SET_DIFFICULTY(e.target.value));
-  };
-
-  const onResetModalClose = () => setIsConfirmModalOpen(false);
-  const openResetModal = () => setIsConfirmModalOpen(true);
-
-  const confirmResetGame = () => {
-    dispatch(GameActions.RESET_GAME());
-    onResetModalClose();
-  };
+  const [
+    isConfirmModalOpen,
+    onResetModalClose,
+    openResetModal,
+    confirmResetGame,
+  ] = useResetGame();
 
   return (
     <>
-      <Flex bg="#171717" h="100vh" w="30%" direction="column">
+      <Flex w="30%" pt="2rem" bg="#171717" h="100vh" direction="column">
         <Flex direction="column" w="100%" align="center">
-          <Text color="white">Difficulty</Text>
-          <Select
-            color="white"
-            value={difficulty}
-            onChange={handleSelect}
-            w="80%"
-            size="xs"
-          >
-            <option value="easy">easy</option>
-            <option value="medium">medium</option>
-            <option value="hard">hard</option>
-          </Select>
-        </Flex>
-        <Flex w="100%" direction="column" m="1rem 0" align="center">
-          <Button
-            onClick={openResetModal}
-            disabled={!gameStarted}
-            w="80%"
-            size="xs"
-          >
-            Reset game
-          </Button>
+          <Text mb="1rem" w="80%" textAlign="center" color="white">
+            Flip a card from the board to <strong>START</strong>
+          </Text>
+          <DifficultySelector />
+          <RestartGameButton
+            confirmResetGame={confirmResetGame}
+            openResetModal={openResetModal}
+          />
+          <Timer />
         </Flex>
       </Flex>
 

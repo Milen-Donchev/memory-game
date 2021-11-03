@@ -1,38 +1,14 @@
-import { Flex, Grid, Text } from "@chakra-ui/react";
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { isEmpty } from "lodash";
+import { Flex, Text } from "@chakra-ui/react";
 
-import * as GameActions from "../../store/game/game";
+import { useGameSetup } from "../../hooks/useGameSetup";
 
-import Card from "./Card";
+import GameBoard from "./GameBoard";
+import GameFinished from "./GameFinished";
 
 import background from "../../resources/background.jpg";
 
 const PlayingBoard = () => {
-  const dispatch = useDispatch();
-
-  const cards = useSelector((state) => state.game.cards);
-  const grid = useSelector((state) => state.game.grid);
-  const difficulty = useSelector((state) => state.game.difficulty);
-  const gameStarted = useSelector((state) => state.game.gameStarted);
-  const correctPicks = useSelector((state) => state.game.correctPicks);
-  const gameWon = useSelector((state) => state.game.gameWon);
-
-  useEffect(() => {
-    if (!isEmpty(correctPicks) && correctPicks.length === cards.length / 2) {
-      dispatch(GameActions.SET_GAME_WON());
-    }
-  }, [correctPicks]);
-
-  useEffect(() => {
-    if (!gameStarted) {
-      dispatch(GameActions.SET_CARDS(difficulty));
-      dispatch(GameActions.SET_GRID(difficulty));
-    }
-  }, [difficulty, gameStarted]);
-
-  if (!cards || !grid) return null;
+  const [cards, grid, gameWon, gameOver] = useGameSetup();
 
   return (
     <Flex
@@ -50,7 +26,7 @@ const PlayingBoard = () => {
         fontFamily="cursive"
         textShadow="1px 1px 1px yellow"
       >
-        Match the tech tool 🛠
+        Match the tech tool
       </Text>
       <Flex
         bg="white"
@@ -58,21 +34,10 @@ const PlayingBoard = () => {
         p="0.5rem"
         borderRadius="10px"
       >
-        {gameWon && <Text>Congratulations!</Text>}
-        {!gameWon && (
-          <Grid
-            w="50%"
-            h="80vh"
-            maxH="80vh"
-            gridGap="0.3rem"
-            templateColumns={`repeat(${grid.cols}, 1fr)`}
-          >
-            {cards.map((card, index) => (
-              <Flex key={String(index)}>
-                <Card _key={card.key} cardId={card.id} image={card.image} />
-              </Flex>
-            ))}
-          </Grid>
+        {!gameWon && !gameOver ? (
+          <GameBoard cards={cards} grid={grid} />
+        ) : (
+          <GameFinished gameWon={gameWon} />
         )}
       </Flex>
     </Flex>
